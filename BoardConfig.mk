@@ -5,6 +5,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+# Inherit the proprietary files
+include device/asus/flox/BoardConfigCommon.mk
+
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := deb
 TARGET_BOOTLOADER_NAME := deb
@@ -19,11 +22,8 @@ TARGET_SYSTEM_PROP += \
 TARGET_RELEASETOOLS_EXTENSIONS := device/asus/debx
 
 # Recovery
-TARGET_RECOVERY_FSTAB = device/asus/debx/rootdir/etc/fstab.debx
+TARGET_RECOVERY_FSTAB := device/asus/debx/rootdir/etc/fstab.debx
 
 # Sepolicy
 BOARD_SEPOLICY_DIRS += device/asus/debx/sepolicy
 
-# Inherit the proprietary files
-include vendor/asus/debx/BoardConfigVendor.mk
-include device/asus/flox/BoardConfigCommon.mk

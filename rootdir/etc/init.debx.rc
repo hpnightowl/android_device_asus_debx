@@ -74,9 +74,6 @@ on boot
     # Allow QMUX daemon to assign port open wait time
     chown radio radio /sys/devices/virtual/hsicctl/hsicctl0/modem_wait
 
-    # java.io.FileNotFoundException: /proc/cmdline: open failed: EACCES (Permission denied)
-    chmod 0644 /proc/cmdline
-
     #Create NETMGR daemon socket area
     mkdir /dev/socket/netmgr 0750 radio radio
 
@@ -114,8 +111,6 @@ on boot
     chown system system /dev/rtc0
 
     chown root system /proc/net/ip_conntrack
-
-    write /proc/sys/vm/swappiness 0
 
     #To allow interfaces to get v6 address when tethering is enabled
     write /proc/sys/net/ipv6/conf/rmnet0/accept_ra 2
@@ -301,7 +296,6 @@ service qmuxd /vendor/bin/qmuxd
 
 service ks_checker /vendor/bin/kickstart_checker.sh
     class core
-    group system
     oneshot
 
 service kickstart /vendor/bin/qcks -i /firmware/image/ -r /data/tombstones/mdm/
@@ -350,6 +344,7 @@ service mpdecision /vendor/bin/mpdecision --avg_comp
     class main
     user root
     group root readproc system
+    disabled
 
 service qcamerasvr /vendor/bin/mm-qcamera-daemon
     class early_hal

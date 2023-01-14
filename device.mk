@@ -30,7 +30,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/fstab.debx:$(TARGET_COPY_OUT_VENDOR)/etc/fstab.flox
 
 # Rild
-PRODUCT_PACKAGES := \
+PRODUCT_PACKAGES += \
     rild \
     CarrierConfig \
     BasicSmsReceiver
