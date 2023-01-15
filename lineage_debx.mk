@@ -1,17 +1,21 @@
-#
-# Copyright (C) 2023 The LineageOS Project
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 
-# Inherit some common Lineage stuff.
-$(call inherit-product, vendor/lineage/config/common_mini_phone.mk)
+# Boot animation
+TARGET_SCREEN_HEIGHT := 1920
+TARGET_SCREEN_WIDTH := 1200
+TARGET_BOOTANIMATION_HALF_RES := true
+
+# Inherit some common CM stuff.
+$(call inherit-product, vendor/lineage/config/common_mini_tablet_wifionly.mk)
+
+# Inherit telephony stuff
+$(call inherit-product, vendor/lineage/config/telephony.mk)
 
 # Inherit from the common Open Source product configuration
 $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/asus/debx/device.mk)
+$(call inherit-product-if-exists, vendor/asus/debx/device-vendor.mk)
 
 # Shipping API
 $(call inherit-product, vendor/lineage/build/target/product/product_launched_with_j_mr2.mk)

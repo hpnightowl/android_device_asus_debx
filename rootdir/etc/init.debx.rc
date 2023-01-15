@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-import init.flox.usb.rc
-import init.flox.power.rc
+import /vendor/etc/init/hw/init.flox.usb.rc
+import /vendor/etc/init/hw/init.flox.power.rc
 
 on early-init
     mount debugfs debugfs /sys/kernel/debug
@@ -30,19 +30,18 @@ on init
     symlink /sdcard /mnt/sdcard
     symlink /sdcard /storage/sdcard0
 
+    setprop ro.kernel.ebpf.supported false
+
     # Set permissions for persist partition
     mkdir /persist 0771 system system
     mkdir /firmware 0771 system system
 
 on fs
-    mount_all ./fstab.flox --early
+    mount_all /vendor/etc/fstab.flox --early
     restorecon_recursive /persist
 
     # GnssConfiguration doesn't actually look at gps.conf, just the debug file
     mount none /system/etc/gps.conf /system/etc/gps_debug.conf bind
-
-    # Start HW service manager early
-    start hwservicemanager
 
 on late-fs
     # Start services for bootanim
@@ -51,12 +50,14 @@ on late-fs
     start bootanim
     start vendor.gralloc-2-0
 
-    mount_all ./fstab.flox --late
+    wait_for_prop hwservicemanager.ready true
+
+    mount_all /vendor/etc/fstab.flox --late
 
 on early-boot
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
-    
+
     # Busy loop to wait for devices booted by devstart_sh just in case device not ready
     exec - root root system -- /vendor/bin/init.qcom.devwait.sh
 
@@ -73,6 +74,9 @@ on boot
 
     # Allow QMUX daemon to assign port open wait time
     chown radio radio /sys/devices/virtual/hsicctl/hsicctl0/modem_wait
+
+    # java.io.FileNotFoundException: /proc/cmdline: open failed: EACCES (Permission denied)
+    chmod 0644 /proc/cmdline
 
     #Create NETMGR daemon socket area
     mkdir /dev/socket/netmgr 0750 radio radio
@@ -145,8 +149,23 @@ on boot
     write /proc/sys/net/core/rmem_max  2097152
     write /proc/sys/net/core/wmem_max  2097152
 
-    # Wifi firmware reload path
     chown wifi wifi /sys/module/wlan/parameters/fwpath
+
+    restorecon --recursive /sys/block/mmcblk0/queue
+    chown system system /sys/block/mmcblk0/queue/scheduler
+    chmod 0664 /sys/block/mmcblk0/queue/scheduler
+
+# Configure IO scheduler
+on property:sys.io.scheduler=*
+    write /sys/block/mmcblk0/queue/scheduler ${sys.io.scheduler}
+
+on property:persist.sys.io.scheduler=*
+    setprop sys.io.scheduler ${persist.sys.io.scheduler}
+
+# Set slice_idle to 0 for CFQ
+on property:sys.io.scheduler=cfq
+    restorecon --recursive /sys/block/mmcblk0/queue
+    write /sys/block/mmcblk0/queue/iosched/slice_idle 0
 
 on property:sys.boot_completed=1
     setprop sys.io.scheduler cfq
@@ -157,11 +176,12 @@ on property:sys.boot_completed=1
     write /proc/sys/vm/page-cluster 0
     write /proc/sys/vm/swappiness 60
     # Enable ZRAM on boot_complete
-    swapon_all /vendor/etc/fstab.flox
+    swapon_all /vendor/etc/fstab.flo
 
 on post-fs
     # Start devices by sysfs trigger
     start devstart_sh
+
     # Allow writing to the kernel trace log.
     chmod 0222 /sys/kernel/debug/tracing/trace_marker
 
@@ -260,7 +280,7 @@ on zygote-start
     mkdir /data/misc/location 0770 gps gps
     mkdir /data/misc/location/gpsone_d 0770 system gps
 
-service irsc_util /vendor/bin/irsc_util "/vendor/etc/sec_config"
+service irsc_util /vendor/bin/irsc_util "/etc/sec_config"
     class main
     user root
     oneshot
@@ -274,6 +294,7 @@ service hciattach /vendor/bin/init.flox.bt.sh
     class late_start
     user bluetooth
     group bluetooth system
+    seclabel u:r:bluetooth_loader:s0
     disabled
     oneshot
 
@@ -296,6 +317,7 @@ service qmuxd /vendor/bin/qmuxd
 
 service ks_checker /vendor/bin/kickstart_checker.sh
     class core
+    group system
     oneshot
 
 service kickstart /vendor/bin/qcks -i /firmware/image/ -r /data/tombstones/mdm/
@@ -328,7 +350,7 @@ on property:ro.data.large_tcp_window_size=true
     # Adjust socket buffer to enlarge TCP receive window for high bandwidth (e.g. DO-RevB)
     write /proc/sys/net/ipv4/tcp_adv_win_scale  1
 
-service charger /system/bin/charger
+service charger /charger
     class charger
     user system
     group system graphics input
@@ -344,7 +366,6 @@ service mpdecision /vendor/bin/mpdecision --avg_comp
     class main
     user root
     group root readproc system
-    disabled
 
 service qcamerasvr /vendor/bin/mm-qcamera-daemon
     class early_hal
