@@ -1,39 +1,34 @@
 #
 # Copyright (C) 2011 The Android Open-Source Project
-# Copyright (C) 2023 The LineageOS Project
 #
-# SPDX-License-Identifier: Apache-2.0
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
-# Inherit Common Configuration
-include device/asus/flox/BoardConfigCommon.mk
-
-# Inherit Proprietary Configurations
-include vendor/asus/debx/BoardConfigVendor.mk
-
-# Defined Paths
-DEVICE_PATH := device/asus/debx
-
-# Board Info
-TARGET_BOARD_INFO_FILE := $(DEVICE_PATH)/board-info.txt
-
-# Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := deb
 TARGET_BOOTLOADER_NAME := deb
+TARGET_BOARD_INFO_FILE := device/asus/debx/board-info.txt
 
-# Manifests
-DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
+DEVICE_MANIFEST_FILE := device/asus/debx/manifest.xml
 
-# Properties
-TARGET_SYSTEM_PROP += \
-    $(COMMON_PATH)/system.prop \
-    $(DEVICE_PATH)/system.prop
+TARGET_RELEASETOOLS_EXTENSIONS := device/asus/debx
 
-# Releasetools
-TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)
+TARGET_SYSTEM_PROP := \
+    device/asus/flox/system.prop \
+    device/asus/debx/system.prop
 
-# Recovery
-TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.debx
+TARGET_RECOVERY_FSTAB := device/asus/debx/rootdir/etc/fstab.debx
 
-# SELinux
-BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+BOARD_VENDOR_SEPOLICY_DIRS += device/asus/debx/sepolicy
+
+include vendor/asus/debx/BoardConfigVendor.mk
+include device/asus/flox/BoardConfigCommon.mk

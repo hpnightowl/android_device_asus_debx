@@ -1,30 +1,31 @@
-#
-# Copyright (C) 2023 The LineageOS Project
-#
-# SPDX-License-Identifier: Apache-2.0
-#
 
-# Inherit applicable common Lineage product configuration
+# Boot animation
+TARGET_SCREEN_HEIGHT := 1920
+TARGET_SCREEN_WIDTH := 1200
+TARGET_BOOTANIMATION_HALF_RES := true
+
+# Inherit some common CM stuff.
 $(call inherit-product, vendor/lineage/config/common_mini_tablet_wifionly.mk)
 
-# Inherit Lineage telephony configuration
+# Inherit telephony stuff
 $(call inherit-product, vendor/lineage/config/telephony.mk)
 
-# Inherit common AOSP configuration
+# Inherit from the common Open Source product configuration
 $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 
-# Inherit device-specific configuration
-$(call inherit-product, $(LOCAL_PATH)/device.mk)
+# Inherit device configuration
+$(call inherit-product, device/asus/debx/device.mk)
+$(call inherit-product-if-exists, vendor/asus/debx/device-vendor.mk)
 
 # Shipping API
 $(call inherit-product, vendor/lineage/build/target/product/product_launched_with_j_mr2.mk)
 
-## Device identifiers - These must come after all inclusions
-PRODUCT_BRAND := google
+## Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := debx
-PRODUCT_MANUFACTURER := asus
-PRODUCT_MODEL := Nexus 7
 PRODUCT_NAME := lineage_debx
+PRODUCT_BRAND := google
+PRODUCT_MODEL := Nexus 7
+PRODUCT_MANUFACTURER := asus
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     PRODUCT_NAME=razorg \
